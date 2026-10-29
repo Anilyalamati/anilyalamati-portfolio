@@ -1,0 +1,170 @@
+@import 'tailwindcss';
+
+/* Self-hosted variable fonts — no runtime dependency on a font CDN. */
+@import '@fontsource-variable/fraunces/standard.css';
+@import '@fontsource-variable/fraunces/standard-italic.css';
+@import '@fontsource-variable/inter';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+/*
+  Brand system
+  ------------
+  Two colors only, per the brief: a dark indigo surface and a warm
+  ivory ink/highlight. Everything else is an opacity or mix of these.
+*/
+@theme {
+  --color-indigo-950: #15172a;
+  --color-indigo-900: #1b1e38;
+  --color-indigo: #282b4a;
+  --color-indigo-700: #343862;
+  --color-indigo-600: #40447a;
+
+  --color-ivory: #eeebda;
+  --color-ivory-dim: #c9c6b6;
+  --color-ivory-faint: #8d8b7e;
+
+  --font-display: 'Fraunces Variable', 'Fraunces', ui-serif, Georgia, serif;
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  --animate-marquee: marquee 28s linear infinite;
+  --animate-grain: grain 8s steps(10) infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes grain {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    10% {
+      transform: translate(-1%, -2%);
+    }
+    30% {
+      transform: translate(2%, 1%);
+    }
+    50% {
+      transform: translate(-2%, 2%);
+    }
+    70% {
+      transform: translate(1%, -1%);
+    }
+    90% {
+      transform: translate(-1%, 2%);
+    }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    @apply border-ivory/10;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html:has(.no-scroll-lock) {
+    scroll-behavior: auto;
+  }
+
+  body {
+    @apply bg-indigo text-ivory font-sans antialiased;
+    font-feature-settings: 'ss01' 1, 'cv01' 1;
+  }
+
+  ::selection {
+    background: var(--color-ivory);
+    color: var(--color-indigo);
+  }
+
+  /* Visible, brand-colored focus ring for every interactive element —
+     required since several custom components suppress the default
+     outline in favor of this one. */
+  :focus-visible {
+    outline: 2px solid var(--color-ivory);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-medium text-balance;
+  }
+
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Desktop custom cursor: hide the native one only where the custom
+     cursor component says it's safe to (see CustomCursor.tsx), and
+     only on devices with a precise pointer. Touch/coarse pointers and
+     reduced-motion users always keep the native cursor. */
+  @media (pointer: fine) {
+    html.custom-cursor-active,
+    html.custom-cursor-active * {
+      cursor: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Faint film-grain texture used over dark surfaces for depth
+     without resorting to gradients or glassmorphism. */
+  .grain::before {
+    content: '';
+    position: absolute;
+    inset: -10%;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: var(--animate-grain);
+  }
+
+  .mask-fade-x {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+  }
+
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-full focus:bg-ivory focus:px-5 focus:py-2.5 focus:text-sm focus:font-medium focus:text-indigo;
+  }
+}
